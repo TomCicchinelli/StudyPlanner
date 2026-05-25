@@ -166,6 +166,7 @@ struct CalendarDayView: View {
                     }
                     .frame(height: CGFloat(hours.count) * 56 + 8)
                 }
+                .scrollDisabled(dayOffset != 0)
                 .clipped()
                 .onAppear { proxy.scrollTo(7, anchor: .top) }
                 .simultaneousGesture(daySwipeGesture)
