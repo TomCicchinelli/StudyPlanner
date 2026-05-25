@@ -455,16 +455,17 @@ struct ExamDetailView: View {
                 .disabled(!inputIsValid)
             }
 
-            // "Use planned" shortcut
+            // "Log planned" shortcut
             if store.loggedAmount(examID: exam.id, on: browsingDate) == nil,
                let planned = plannedForDay(exam: exam) {
                 Button {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     logInput = formatted(planned)
+                    submitLog(for: exam)
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "wand.and.stars").font(.system(size: 12))
-                        Text("Use planned — \(formatted(planned)) \(exam.unit.unitNoun)")
+                        Text("Log \(formatted(planned)) \(exam.unit.unitNoun)")
                             .font(.system(size: 13, weight: .medium))
                     }
                     .foregroundStyle(glowColor)
