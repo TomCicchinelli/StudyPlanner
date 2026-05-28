@@ -285,8 +285,13 @@ struct ExamFormView: View {
                 .padding(.bottom, 20)  // extra clearance for tab bar when embedded
             }
             .background(Color(.systemGroupedBackground))
-            .scrollDismissesKeyboard(.interactively)
-            .dismissKeyboardOnTap()
+            .scrollDismissesKeyboard(.immediately)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                UIApplication.shared.sendAction(
+                    #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
+                )
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     if isEditing && canCancel { Button("Cancel") { dismiss() }.foregroundStyle(Color.appAccent) }
@@ -447,14 +452,16 @@ private struct IntervalPicker: View {
             Button("Custom…") { showCustomInterval = true }
         } label: {
             HStack(spacing: 4) {
-                Text(menuLabel).font(.system(size: 14, weight: .medium))
-                Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold))
+                Text(menuLabel).font(.system(size: 15, weight: .regular))
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary)
             }
-            .foregroundStyle(Color.appAccent)
+            .foregroundColor(.primary)
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
             .background(
-                RoundedRectangle(cornerRadius: 10).fill(Color.appAccentSoft)
+                RoundedRectangle(cornerRadius: 8).fill(Color(.tertiarySystemFill))
             )
         }
     }
@@ -467,11 +474,24 @@ private struct NumberStepperField: View {
     let integer: Bool
     var placeholder: String = ""
 
+    @FocusState private var focused: Bool
+
     var body: some View {
         TextField(placeholder, text: $text)
             .keyboardType(integer ? .numberPad : .decimalPad)
             .multilineTextAlignment(.trailing)
             .font(.system(size: 16, design: .rounded))
+            .focused($focused)
+            .onChange(of: focused) { _, isFocused in
+                guard isFocused else { return }
+                // Select the whole field on focus so the user can immediately
+                // overwrite or position the cursor without fiddling.
+                DispatchQueue.main.async {
+                    UIApplication.shared.sendAction(
+                        #selector(UIResponder.selectAll(_:)), to: nil, from: nil, for: nil
+                    )
+                }
+            }
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
             .background(
@@ -480,7 +500,7 @@ private struct NumberStepperField: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
-                    .stroke(Color(.systemGray4), lineWidth: 1)
+                    .stroke(focused ? Color.appAccent.opacity(0.6) : Color(.systemGray4), lineWidth: focused ? 1.5 : 1)
             )
     }
 }

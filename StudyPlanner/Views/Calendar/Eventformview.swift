@@ -133,6 +133,7 @@ struct EventFormView: View {
                                 } label: {
                                     pill(text: repeatFrequency.rawValue, chevron: true) {}
                                 }
+                                .tint(Color.appAccent)
                                 .buttonStyle(.plain)
                             }
 
@@ -143,18 +144,19 @@ struct EventFormView: View {
                                 HStack {
                                     fieldLabel("Color")
                                     Spacer()
-                                    HStack(spacing: 8) {
+                                    HStack(spacing: 7) {
                                         Circle()
                                             .fill(eventColor.swiftUIColor)
-                                            .frame(width: 22, height: 22)
-                                            .shadow(color: eventColor.swiftUIColor.opacity(0.4), radius: 3)
+                                            .frame(width: 18, height: 18)
                                         Text(eventColor.displayName)
-                                            .font(.system(size: 14, weight: .medium))
-                                        Image(systemName: "chevron.right")
-                                            .font(.system(size: 11, weight: .semibold))
-                                            .foregroundStyle(.secondary)
+                                            .font(.system(size: 15, weight: .regular))
+                                            .foregroundColor(.primary)
+                                        Image(systemName: "chevron.up.chevron.down")
+                                            .font(.system(size: 11, weight: .medium))
+                                            .foregroundColor(.secondary)
                                     }
-                                    .foregroundStyle(Color.appAccent)
+                                    .padding(.horizontal, 12).padding(.vertical, 7)
+                                    .background(RoundedRectangle(cornerRadius: 8).fill(Color(.tertiarySystemFill)))
                                 }
                             }
                             .buttonStyle(.plain)
@@ -214,8 +216,13 @@ struct EventFormView: View {
                 .padding(16)
             }
             .background(Color(.systemGroupedBackground))
-            .scrollDismissesKeyboard(.interactively)
-            .dismissKeyboardOnTap()
+            .scrollDismissesKeyboard(.immediately)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                UIApplication.shared.sendAction(
+                    #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
+                )
+            }
             .navigationTitle(isEditing ? "Edit event" : "New event")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -242,6 +249,7 @@ struct EventFormView: View {
                 ColorPickerSheet(selection: $eventColor)
             }
         }
+        .tint(Color.appAccent)
     }
 
     // MARK: - Subviews
@@ -264,16 +272,17 @@ struct EventFormView: View {
 
     @ViewBuilder
     private func pill(text: String, chevron: Bool = false, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 4) {
-                Text(text).font(.system(size: 13, weight: .medium))
-                if chevron { Image(systemName: "chevron.down").font(.system(size: 10, weight: .semibold)) }
+        HStack(spacing: 4) {
+            Text(text).font(.system(size: 15, weight: .regular))
+            if chevron {
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary)
             }
-            .foregroundStyle(Color.appAccent)
-            .padding(.horizontal, 11).padding(.vertical, 6)
-            .background(RoundedRectangle(cornerRadius: 10).fill(Color.appAccentSoft))
         }
-        .buttonStyle(.plain)
+        .foregroundColor(.primary)
+        .padding(.horizontal, 12).padding(.vertical, 7)
+        .background(RoundedRectangle(cornerRadius: 8).fill(Color(.tertiarySystemFill)))
     }
 
     // MARK: - Logic

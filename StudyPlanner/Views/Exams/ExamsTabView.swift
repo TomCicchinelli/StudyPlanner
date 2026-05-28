@@ -16,9 +16,9 @@ struct ExamsTabView: View {
                 ExamFormView(mode: .create, canCancel: false)
             } else {
                 ExamDetailView()
+                    .scrollDisabled(true)
             }
         }
-        .scrollDisabled(true)
     }
 }
 

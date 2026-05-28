@@ -122,7 +122,8 @@ struct ExamDetailView: View {
                 // ── Overflow banner — above the day carousel ──────────
                 // NOTE: no swipe gesture here — the banner has its own
                 // horizontal UIScrollView and must not trigger day navigation.
-                if overflow {
+                // Hidden while the log input is focused so the keyboard has room.
+                if overflow && !inputFocused {
                     overflowBanner(glowColor: glowColor)
                         .transition(.opacity.combined(with: .move(edge: .top)))
                 }
@@ -150,10 +151,8 @@ struct ExamDetailView: View {
                 .frame(maxHeight: .infinity)
                 .clipped()
                 .scrollDisabled(true)
-                .simultaneousGesture(daySwipeGesture(earliest: earliest,
-                                                     isBrowsingToday: isBrowsingToday,
-                                                     isAtEarliest: isAtEarliest))
             }
+            .animation(.easeInOut(duration: 0.25), value: inputFocused)
         }
     }
 
@@ -507,9 +506,9 @@ struct ExamDetailView: View {
     // MARK: - Date label
 
     private func dateLabel(date: Date, isToday: Bool) -> some View {
-        // Use .fixedSize() so the hit target is only the text itself, not the full-width row.
-        // The drag gesture takes priority — if the touch moves more than 8pt it's a swipe,
-        // not a tap, so the picker is not opened.
+        // Only a clean tap (no finger movement) opens the picker. A TapGesture
+        // inherently cancels if the touch moves, so swipes never trigger it.
+        // The hit target is restricted to the text itself via .fixedSize().
         VStack(spacing: 2) {
             Text(isToday ? "Today" : "Past day")
                 .font(.system(size: 10, weight: .semibold))
@@ -525,17 +524,12 @@ struct ExamDetailView: View {
             }
         }
         .fixedSize()
-        .frame(maxWidth: .infinity)
         .contentShape(Rectangle())
-        .gesture(
-            DragGesture(minimumDistance: 0)
-                .onEnded { value in
-                    let distance = sqrt(pow(value.translation.width, 2) + pow(value.translation.height, 2))
-                    guard distance < 8 else { return }   // it was a tap, not a swipe
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    showDatePicker = true
-                }
-        )
+        .onTapGesture {
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            showDatePicker = true
+        }
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Subviews

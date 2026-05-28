@@ -397,7 +397,7 @@ private struct TimelineView: View {
                     subtitle: durationLabel(block.duration),
                     start: block.date, end: block.endDate,
                     accent: Color.appAccent, bg: Color.appAccentSoft,
-                    dashed: true,
+                    dashed: false,
                     xOffset: labelWidth + 4, width: trackWidth
                 )
                 .allowsHitTesting(false)
